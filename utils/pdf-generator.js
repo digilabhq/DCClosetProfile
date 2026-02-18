@@ -1,5 +1,5 @@
 // utils/pdf-generator.js
-// v1.8 | last: logo 50pt, section labels black, all row values gold | next: —
+// v1.9 | last: logo aligned to CLOSET PROFILE top, content pushed down to prevent overlap | next: —
 (function () {
   function dateDisplay() {
     const d = new Date();
@@ -40,7 +40,8 @@
     const right= 195;
     let y      = 15;
 
-    // ── LOGO via Image() preload (works on any screen) ───────
+    // ── LOGO — top aligned with CLOSET PROFILE text ──────────
+    const logoY = y;
     try {
       const logoImg = await new Promise((resolve, reject) => {
         const img = new Image();
@@ -52,17 +53,19 @@
       const aspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
       const logoH = 50;
       const logoW = Math.min(logoH * aspectRatio, 160);
-      doc.addImage(logoImg, "PNG", left, y, logoW, logoH);
+      doc.addImage(logoImg, "PNG", left, logoY, logoW, logoH);
     } catch (e) {
       console.log("Logo not added to PDF");
     }
 
-    // CLOSET PROFILE — top right
+    // CLOSET PROFILE — top right, same Y as logo top
     doc.setFontSize(7);
     doc.setFont(undefined, "normal");
     doc.setTextColor(...black);
-    doc.text("CLOSET PROFILE", right, y + 8, { align: "right" });
-    y += 20;
+    doc.text("CLOSET PROFILE", right, logoY + 5, { align: "right" });
+
+    // Push y past the logo block before drawing rule
+    y = logoY + 54;
 
     // ── GOLD RULE ────────────────────────────────────────────
     doc.setDrawColor(...gold);
