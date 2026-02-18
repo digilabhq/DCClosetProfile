@@ -1,5 +1,5 @@
 // app.js
-// v1.2 | last: desktop=download only, mobile=Web Share | next: —
+// v1.3 | last: share title → Closet Profile Summary | next: —
 (function () {
   const cfg = window.DCV_CONFIG;
   if (!cfg) throw new Error("Missing DCV_CONFIG");
@@ -567,7 +567,7 @@
         try {
           const file = new File([pdfBlob], filename, { type: "application/pdf" });
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], title: "Design Vision Summary" });
+            await navigator.share({ files: [file], title: "Closet Profile Summary" });
             return;
           }
         } catch (e) {

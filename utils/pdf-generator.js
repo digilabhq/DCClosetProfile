@@ -1,5 +1,5 @@
 // utils/pdf-generator.js
-// v1.5 | last: DOM logo fix, renamed to CLOSET PROFILE, full DCClosetProfile deploy | next: —
+// v1.6 | last: Image() preload for logo (DOM-independent), share title fix | next: —
 (function () {
   function dateDisplay() {
     const d = new Date();
@@ -40,19 +40,19 @@
     const right= 195;
     let y      = 15;
 
-    // ── LOGO via DOM (no CORS) ───────────────────────────────
+    // ── LOGO via Image() preload (works on any screen) ───────
     try {
-      // Target the logo image specifically — not the small icon
-      const logoEl = document.querySelector('img[src*="Logo.png"]') ||
-                     document.querySelector('img[src*="Logo.jpg"]') ||
-                     document.querySelector('.welcome .logo img');
-      if (logoEl && logoEl.complete && logoEl.naturalWidth > 0) {
-        // Preserve aspect ratio at fixed height of 14pt
-        const aspectRatio = logoEl.naturalWidth / logoEl.naturalHeight;
-        const logoH = 14;
-        const logoW = Math.min(logoH * aspectRatio, 70);
-        doc.addImage(logoEl, "PNG", left, y, logoW, logoH);
-      }
+      const logoImg = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = "assets/images/icons/Logo.png?" + Date.now();
+      });
+      const aspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
+      const logoH = 14;
+      const logoW = Math.min(logoH * aspectRatio, 70);
+      doc.addImage(logoImg, "PNG", left, y, logoW, logoH);
     } catch (e) {
       console.log("Logo not added to PDF");
     }
