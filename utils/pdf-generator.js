@@ -1,18 +1,10 @@
 // utils/pdf-generator.js
-// v2.0 | last: logo top aligned to CLOSET PROFILE, air gap tightened | next: —
+// v2.1 | last: full header rewrite, fixed logo/CLOSET PROFILE alignment, no gap | next: —
 (function () {
   function dateDisplay() {
     const d = new Date();
     return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
   }
-  function sanitizeFilename(s) {
-    return (s || "client").trim().replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, " ");
-  }
-  function dateStamp() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-  }
-
   function ensureJsPDF() {
     return new Promise((resolve, reject) => {
       if (window.jspdf && window.jspdf.jsPDF) return resolve();
@@ -35,13 +27,20 @@
     const lineclr = [230, 224, 212];
     const tintbg  = [250, 248, 243];
 
-    const doc  = new jsPDF();
+    const doc  = new jsPDF(); // default: mm, A4 (210x297mm)
     const left = 15;
-    const right= 195;
-    let y      = 15;
+    const right = 195;
 
-    // ── LOGO — top aligned with CLOSET PROFILE text ──────────
-    const logoY = y;
+    // ── FIXED HEADER COORDINATES ─────────────────────────────
+    // Everything in the header uses explicit mm values — no y accumulation
+    const LOGO_TOP    = 10;  // logo starts 10mm from top
+    const LOGO_H      = 25;  // logo height 25mm (~50pt equivalent, not too big)
+    const RULE_Y      = LOGO_TOP + LOGO_H + 3; // gold rule sits 3mm below logo bottom
+    const LABEL_Y     = RULE_Y + 6;  // CLIENT / DATE labels
+    const NAME_Y      = LABEL_Y + 4; // client name / date value
+    const SUBINFO_Y   = NAME_Y + 5;  // address/phone/email starts here
+
+    // ── LOGO ─────────────────────────────────────────────────
     try {
       const logoImg = await new Promise((resolve, reject) => {
         const img = new Image();
@@ -51,66 +50,67 @@
         img.src = "assets/images/icons/Logo.png?" + Date.now();
       });
       const aspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
-      const logoH = 50;
-      const logoW = Math.min(logoH * aspectRatio, 160);
-      doc.addImage(logoImg, "PNG", left, logoY, logoW, logoH);
+      const logoW = Math.min(LOGO_H * aspectRatio, 80);
+      doc.addImage(logoImg, "PNG", left, LOGO_TOP, logoW, LOGO_H);
     } catch (e) {
       console.log("Logo not added to PDF");
     }
 
-    // CLOSET PROFILE — top right, same Y as logo top
-    doc.setFontSize(7);
+    // ── CLOSET PROFILE — top-right, aligned to logo top ──────
     doc.setFont(undefined, "normal");
+    doc.setFontSize(7);
     doc.setTextColor(...black);
-    doc.text("CLOSET PROFILE", right, logoY + 5, { align: "right" });
+    doc.text("CLOSET PROFILE", right, LOGO_TOP + 4, { align: "right" });
 
-    // Push y past the logo block before drawing rule
-    y = logoY + 52;
-
-    // ── GOLD RULE ────────────────────────────────────────────
+    // ── GOLD RULE ─────────────────────────────────────────────
     doc.setDrawColor(...gold);
     doc.setLineWidth(0.5);
-    doc.line(left, y, right, y);
-    y += 8;
+    doc.line(left, RULE_Y, right, RULE_Y);
 
-    // ── CLIENT BLOCK ─────────────────────────────────────────
-    doc.setFontSize(7);
+    // ── CLIENT / DATE LABELS ──────────────────────────────────
     doc.setFont(undefined, "bold");
+    doc.setFontSize(7);
     doc.setTextColor(...black);
-    doc.text("CLIENT", left, y);
-    doc.text("DATE", right, y, { align: "right" });
-    y += 4;
+    doc.text("CLIENT", left, LABEL_Y);
+    doc.text("DATE", right, LABEL_Y, { align: "right" });
 
+    // ── CLIENT NAME / DATE VALUE ──────────────────────────────
     doc.setFont(undefined, "normal");
     doc.setFontSize(8.5);
     doc.setTextColor(...black);
-    doc.text(state.contact?.name || "—", left, y);
-    doc.text(dateDisplay(), right, y, { align: "right" });
-    y += 4;
+    doc.text(state.contact?.name || "—", left, NAME_Y);
+    doc.text(dateDisplay(), right, NAME_Y, { align: "right" });
 
+    // ── SUB INFO (address, phone, email) ─────────────────────
     doc.setFontSize(7.5);
     doc.setTextColor(...muted);
-    const contactLines = [state.contact?.address, state.contact?.phone, state.contact?.email].filter(Boolean);
-    contactLines.forEach(line => { doc.text(line, left, y); y += 3.5; });
+    const contactLines = [
+      state.contact?.address,
+      state.contact?.phone,
+      state.contact?.email
+    ].filter(Boolean);
+    contactLines.forEach((line, i) => {
+      doc.text(line, left, SUBINFO_Y + (i * 4));
+    });
 
-    // CONTACT PREF — right side aligned with first contact line
-    const cpY = y - (3.5 * contactLines.length);
-    doc.setFontSize(7);
+    // ── CONTACT PREF — right, aligned to first sub info line ─
     doc.setFont(undefined, "bold");
+    doc.setFontSize(7);
     doc.setTextColor(...black);
-    doc.text("CONTACT PREF", right, cpY, { align: "right" });
+    doc.text("CONTACT PREF", right, SUBINFO_Y, { align: "right" });
     doc.setFont(undefined, "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(...muted);
-    doc.text(state.contact?.method || "—", right, cpY + 4, { align: "right" });
+    doc.text(state.contact?.method || "—", right, SUBINFO_Y + 4, { align: "right" });
 
-    y += 6;
-
-    // Border bottom
+    // ── BORDER BOTTOM OF CLIENT BLOCK ────────────────────────
+    const clientBlockBottom = SUBINFO_Y + (contactLines.length * 4) + 4;
     doc.setDrawColor(...lineclr);
     doc.setLineWidth(0.3);
-    doc.line(left, y, right, y);
-    y += 8;
+    doc.line(left, clientBlockBottom, right, clientBlockBottom);
+
+    // ── CONTENT STARTS HERE ───────────────────────────────────
+    let y = clientBlockBottom + 8;
 
     // ── SECTION HELPER ───────────────────────────────────────
     function section(title) {
