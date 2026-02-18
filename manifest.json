@@ -1,0 +1,15 @@
+{
+  "name": "DC Closet Profile",
+  "short_name": "DC Closet",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "assets/images/icons/Icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
