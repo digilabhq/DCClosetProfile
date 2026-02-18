@@ -1,5 +1,5 @@
 // utils/pdf-generator.js
-// v1.9 | last: logo aligned to CLOSET PROFILE top, content pushed down to prevent overlap | next: —
+// v2.0 | last: logo top aligned to CLOSET PROFILE, air gap tightened | next: —
 (function () {
   function dateDisplay() {
     const d = new Date();
@@ -65,7 +65,7 @@
     doc.text("CLOSET PROFILE", right, logoY + 5, { align: "right" });
 
     // Push y past the logo block before drawing rule
-    y = logoY + 54;
+    y = logoY + 52;
 
     // ── GOLD RULE ────────────────────────────────────────────
     doc.setDrawColor(...gold);
