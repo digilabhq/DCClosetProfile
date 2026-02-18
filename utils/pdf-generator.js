@@ -1,5 +1,5 @@
 // utils/pdf-generator.js
-// v1.6 | last: Image() preload for logo (DOM-independent), share title fix | next: —
+// v1.7 | last: logo 200% bigger, contact order Name/Address/Phone/Email | next: —
 (function () {
   function dateDisplay() {
     const d = new Date();
@@ -50,8 +50,8 @@
         img.src = "assets/images/icons/Logo.png?" + Date.now();
       });
       const aspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
-      const logoH = 14;
-      const logoW = Math.min(logoH * aspectRatio, 70);
+      const logoH = 28;
+      const logoW = Math.min(logoH * aspectRatio, 140);
       doc.addImage(logoImg, "PNG", left, y, logoW, logoH);
     } catch (e) {
       console.log("Logo not added to PDF");
@@ -87,7 +87,7 @@
 
     doc.setFontSize(7.5);
     doc.setTextColor(...muted);
-    const contactLines = [state.contact?.email, state.contact?.phone, state.contact?.address].filter(Boolean);
+    const contactLines = [state.contact?.address, state.contact?.phone, state.contact?.email].filter(Boolean);
     contactLines.forEach(line => { doc.text(line, left, y); y += 3.5; });
 
     // CONTACT PREF — right side aligned with first contact line
