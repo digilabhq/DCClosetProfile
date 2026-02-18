@@ -1,5 +1,5 @@
 // utils/pdf-generator.js
-// v1.7 | last: logo 200% bigger, contact order Name/Address/Phone/Email | next: —
+// v1.8 | last: logo 50pt, section labels black, all row values gold | next: —
 (function () {
   function dateDisplay() {
     const d = new Date();
@@ -50,8 +50,8 @@
         img.src = "assets/images/icons/Logo.png?" + Date.now();
       });
       const aspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
-      const logoH = 28;
-      const logoW = Math.min(logoH * aspectRatio, 140);
+      const logoH = 50;
+      const logoW = Math.min(logoH * aspectRatio, 160);
       doc.addImage(logoImg, "PNG", left, y, logoW, logoH);
     } catch (e) {
       console.log("Logo not added to PDF");
@@ -114,7 +114,7 @@
       if (y > 265) { doc.addPage(); y = 15; }
       doc.setFontSize(6.5);
       doc.setFont(undefined, "bold");
-      doc.setTextColor(...gold);
+      doc.setTextColor(...black);
       doc.text(title.toUpperCase(), left, y);
       y += 1.5;
       doc.setDrawColor(...gold);
@@ -125,14 +125,14 @@
     }
 
     // ── ROW HELPER ───────────────────────────────────────────
-    function row(label, value, valueColor) {
+    function row(label, value) {
       if (y > 270) { doc.addPage(); y = 15; }
       doc.setFont(undefined, "normal");
       doc.setFontSize(8);
       doc.setTextColor(...black);
       doc.text(label, left, y);
       const wrapped = doc.splitTextToSize(String(value || "—"), 90);
-      doc.setTextColor(...(valueColor || muted));
+      doc.setTextColor(...gold);
       doc.text(wrapped, right, y, { align: "right" });
       doc.setDrawColor(...lineclr);
       doc.setLineWidth(0.2);
@@ -152,7 +152,7 @@
     section("Space Ratio");
     const hangPct = 100 - (state.q2 ?? 50);
     const shelvPct = state.q2 ?? 50;
-    row("Hanging", `${hangPct}%`, hangPct >= shelvPct ? gold : muted);
+    row("Hanging", `${hangPct}%`);
     row("Shelving", `${shelvPct}%`);
     y += 3;
 
@@ -186,7 +186,7 @@
     // ── INSPIRATION ──────────────────────────────────────────
     section("Inspiration");
     const inspoVal = state.q7 === "Yes" ? "Yes — will send separately" : (state.q7 || "—");
-    row("Has Inspiration Photos", inspoVal, state.q7 === "Yes" ? gold : muted);
+    row("Has Inspiration Photos", inspoVal);
 
     // ── FOOTER ───────────────────────────────────────────────
     const pageHeight = doc.internal.pageSize.height;
