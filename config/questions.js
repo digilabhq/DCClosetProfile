@@ -40,7 +40,7 @@
       stepsCount: 8,
       tagline: "inspired by her",
       iconPath: "assets/images/icons/Icon.png",
-      logoPath: "assets/images/icons/Logo.png"
+      logoPath: "assets/images/icons/Logo.svg"
     },
     welcome: {
       headlineParts: ["from desire to ", "reality"],
